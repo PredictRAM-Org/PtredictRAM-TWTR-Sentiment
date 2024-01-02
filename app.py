@@ -15,9 +15,8 @@ auth.set_access_token(access_token, access_token_secret)
 try:
     api = tweepy.API(auth)
     api.verify_credentials()
-    st.success("Twitter API authentication successful!")
 except tweepy.TweepError as e:
-    st.error(f"Error: {str(e)}")
+    st.error(f"Error authenticating with Twitter API: {str(e)}")
 
 def analyze_sentiment(tweet):
     analysis = TextBlob(tweet)
