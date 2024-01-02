@@ -3,10 +3,10 @@ from textblob import TextBlob
 import streamlit as st
 
 # Twitter API credentials
-consumer_key = "YOUR_CONSUMER_KEY"
-consumer_secret = "YOUR_CONSUMER_SECRET"
-access_token = "YOUR_ACCESS_TOKEN"
-access_token_secret = "YOUR_ACCESS_TOKEN_SECRET"
+consumer_key = "Y3Z0WV83alIwcm1VUUZIaXZXb206MTpjaQ"
+consumer_secret = "G8E7g8Rmvj6jXN__aOp2aUaPrFPwppF3RZ4zpf9MnZc74fySO6"
+access_token = "1262920554048139265-7l2KzIl33uqm7KeHDe1xaMHo1mwqbA"
+access_token_secret = "mCroSJtgw8O9fw5TqtHEFphT56kDTObyraSz7niWhhstU"
 
 # Authenticate with Twitter API
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
