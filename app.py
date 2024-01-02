@@ -1,65 +1,48 @@
-import tweepy
-from textblob import TextBlob
 import streamlit as st
+import tweepy
 
-# Twitter API credentials
-consumer_key = "xYUXxXVe94iWSwYHbLM5wFDO0"
-consumer_secret = "AEUNi7lJM6XNlskSclW0RYkynH5qXcLnHZpetb3ZoOEV1mUEvs"
-access_token = "1262920554048139265-7l2KzIl33uqm7KeHDe1xaMHo1mwqbA"
-access_token_secret = "mCroSJtgw8O9fw5TqtHEFphT56kDTObyraSz7niWhhstU"
+def authenticate_twitter_api(api_key, api_secret_key, access_token, access_token_secret):
+    try:
+        auth = tweepy.OAuthHandler(api_key, api_secret_key)
+        auth.set_access_token(access_token, access_token_secret)
+        api = tweepy.API(auth)
+        return api
+    except tweepy.TweepError as e:
+        st.error(f"Twitter API authentication failed: {str(e)}")
+        return None
 
-# Authenticate with Twitter API
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-
-try:
-    api = tweepy.API(auth)
-    api.verify_credentials()
-except tweepy.TweepError as e:
-    st.error(f"Error authenticating with Twitter API: {str(e)}")
-
-def analyze_sentiment(tweet):
-    analysis = TextBlob(tweet)
-    return analysis.sentiment.polarity
+def fetch_tweets(api, query, count=10):
+    try:
+        tweets = api.search(q=query, count=count)
+        return tweets
+    except tweepy.TweepError as e:
+        st.error(f"Error fetching tweets: {str(e)}")
+        return []
 
 def main():
-    st.title("Stock Sentiment Analyzer")
+    st.title("Twitter Sentiment Analysis App")
 
-    # User input for stock symbol
-    stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):")
+    # Input for Twitter API credentials
+    api_key = st.text_input("Enter Twitter API Key:")
+    api_secret_key = st.text_input("Enter Twitter API Secret Key:")
+    access_token = st.text_input("Enter Twitter Access Token:")
+    access_token_secret = st.text_input("Enter Twitter Access Token Secret:")
 
-    if st.button("Analyze Sentiment"):
-        if not stock_symbol:
-            st.warning("Please enter a valid stock symbol.")
-            return
+    # Authenticate Twitter API
+    api = authenticate_twitter_api(api_key, api_secret_key, access_token, access_token_secret)
 
-        try:
-            # Fetch tweets related to the stock
-            tweets = api.search(q=f"{stock_symbol} stock", count=100, lang="en")
-        except tweepy.TweepError as e:
-            st.error(f"Error fetching tweets: {str(e)}")
-            return
+    if api:
+        # Input for Twitter query
+        query = st.text_input("Enter a search query:")
 
-        if not tweets:
-            st.warning("No tweets found for the given stock symbol.")
-            return
+        if query:
+            # Fetch tweets
+            tweets = fetch_tweets(api, query)
 
-        # Analyze sentiment of each tweet
-        sentiments = [analyze_sentiment(tweet.text) for tweet in tweets]
+            # Display tweets
+            st.write(f"## Tweets for '{query}':")
+            for tweet in tweets:
+                st.write(f"{tweet.user.screen_name}: {tweet.text}")
 
-        # Calculate overall sentiment
-        overall_sentiment = sum(sentiments) / len(sentiments)
-
-        # Display results
-        st.subheader(f"Sentiment Analysis for {stock_symbol} Stock:")
-        st.write(f"Overall Sentiment: {overall_sentiment:.2f}")
-
-        # Display individual tweet sentiments
-        st.subheader("Individual Tweet Sentiments:")
-        for i, tweet in enumerate(tweets):
-            st.write(f"{i + 1}. {tweet.text}")
-            st.write(f"Sentiment: {sentiments[i]:.2f}")
-            st.write("----")
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
