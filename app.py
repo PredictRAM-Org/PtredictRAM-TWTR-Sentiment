@@ -3,15 +3,21 @@ from textblob import TextBlob
 import streamlit as st
 
 # Twitter API credentials
-consumer_key = "Y3Z0WV83alIwcm1VUUZIaXZXb206MTpjaQ"
-consumer_secret = "G8E7g8Rmvj6jXN__aOp2aUaPrFPwppF3RZ4zpf9MnZc74fySO6"
+consumer_key = "xYUXxXVe94iWSwYHbLM5wFDO0"
+consumer_secret = "AEUNi7lJM6XNlskSclW0RYkynH5qXcLnHZpetb3ZoOEV1mUEvs"
 access_token = "1262920554048139265-7l2KzIl33uqm7KeHDe1xaMHo1mwqbA"
 access_token_secret = "mCroSJtgw8O9fw5TqtHEFphT56kDTObyraSz7niWhhstU"
 
 # Authenticate with Twitter API
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
+
+try:
+    api = tweepy.API(auth)
+    api.verify_credentials()
+    st.success("Twitter API authentication successful!")
+except tweepy.TweepError as e:
+    st.error(f"Error: {str(e)}")
 
 def analyze_sentiment(tweet):
     analysis = TextBlob(tweet)
@@ -28,8 +34,12 @@ def main():
             st.warning("Please enter a valid stock symbol.")
             return
 
-        # Fetch tweets related to the stock
-        tweets = api.search(q=f"{stock_symbol} stock", count=100, lang="en")
+        try:
+            # Fetch tweets related to the stock
+            tweets = api.search(q=f"{stock_symbol} stock", count=100, lang="en")
+        except tweepy.TweepError as e:
+            st.error(f"Error fetching tweets: {str(e)}")
+            return
 
         if not tweets:
             st.warning("No tweets found for the given stock symbol.")
